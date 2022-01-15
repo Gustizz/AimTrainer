@@ -22,6 +22,6 @@ function getCursorPosition(c, event) {
 
 function addNum()
 {
-  var a = 1 +1;
+  var a = 1 +1 + 1;
 }
 
