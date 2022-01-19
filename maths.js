@@ -19,9 +19,3 @@ function getCursorPosition(c, event) {
     lastClick.x = x;
     lastClick.y = y;
 }
-
-function addNum()
-{
-  var a = 1 +1 + 1;
-}
-

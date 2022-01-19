@@ -2,6 +2,8 @@ var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 ctx.moveTo(0,0);
 
+var distanceThreshhold = 50;
+
 var v2 = class 
 {
   constructor(x,y)
@@ -13,20 +15,25 @@ var v2 = class
 
 var lastClick = new v2(0,0);
 var playerStat = new playerStats();
+var targetsClicked = 0;
+// timer = 30000 miliseconds or 30 seconds
+var timer = 30000;
 
+
+// Run Event Listener when the user has clicked on the CANVAS
+// When Clicked on the Canvas Get Mouse Pos and calculate distance from mouse      Pos to target pos
 c.addEventListener('click', function(event) 
 {
-  //console.log("yo");
    getCursorPosition(c,event);
    calculateCollisionWithMouse();
 }, false);
 
-var cubeObj = class
+
+var targetObj = class
 {
-  constructor(width,height,x,y,active)
+  constructor(radius,x,y,active)
   {
-    this.width = width;
-    this.height = height;
+    this.radius = radius;
     this.x = x;
     this.y = y;
 
@@ -40,18 +47,26 @@ var cubeObj = class
   }
 }
 
-
-var cube1 = new cubeObj(10,10,10,10,false);
-spawnCube(cube1);
-
-function spawnCube(cube)
+function endGame()
 {
-  ctx.beginPath();
-  ctx.rect(cube.x, cube.y, cube.width, cube.height);
-  ctx.stroke(); 
+  console.log("WELL DONE YOU ARE WACK!");
+  console.log("Accuracy: " + playerStat.calculateAccuracy());
 }
 
-var objectsToDraw = [cube1]
+//Spawns the initial target to start the game off
+// new targetobj(radius,x,y,active)
+var target1 = new targetObj(50,10,10,true);
+spawnTarget(target1);
+
+//Draws a circle for the target
+function spawnTarget(target)
+{
+  ctx.beginPath();
+  ctx.ellipse(target.x , target.y, target.radius, target.radius, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+var objectsToDraw = [target1]
 
 function calculateCollisionWithMouse()
 {
@@ -61,9 +76,13 @@ function calculateCollisionWithMouse()
   // Get closest Square
   for(var i = 0; i < objectsToDraw.length; i++)
   {
+
+    //Gets the distance between mouse and current object
     var newTempD = getDistanceVdctor2({x: objectsToDraw[i].x, y: objectsToDraw[i].y}, lastClick);
-    console.log("TEMP DIST: " + (Math.floor(tempDistance * 100) * 0.01));
+    //console.log("TEMP DIST: " + (Math.floor(tempDistance * 100) * 0.01));
    
+   //if this distance is lower than the last then change the new distanc3
+   //this gets lets us get the closets target to the target
     if(newTempD < tempDistance)
     {
       tempDistance = newTempD;
@@ -71,17 +90,25 @@ function calculateCollisionWithMouse()
     } 
   }
 
-  var distanceThreshhold = 150;
+  // ADD TO PLAYER STATS
+      distanceThreshhold = 50;
+  //if the distance is lower than the radius of the target then    
   if(tempDistance < distanceThreshhold)
   {
+    //console.log("OBJECT HAS BEEN HIT1")
     objectsToDraw[closestIndex].active = false;
     playerStat.targetsHit++;
 
-    var accuracy = (tempDistance / distanceThreshhold) * 100
-    playerStat.allHits.push(accuracy);
+    var accuracy = 100 - (tempDistance / distanceThreshhold) * 100;
+    playerStat.allHits.push(tempDistance);
+  }
+  else
+  {
+    playerStat.allHits.push(0);
   }
 
-  print(playerStat);
+  targetsClicked++;
+  //console.log(playerStat);
 }
 
 function gameTick()
@@ -93,20 +120,33 @@ function gameTick()
   
   for(var i = 0; i < objectsToDraw.length; i++)
   {
-    if(!objectsToDraw.active)
+    if(!objectsToDraw[i].active)
     {
+      //console.log("RANDOMOIS")
       objectsToDraw[i].setRandomPos();
+      objectsToDraw[i].active = true;
     }
   }
-
   
   // ----- END GAME LOGIC
 
   // Draw Objects
   for(var i = 0; i < objectsToDraw.length; i++)
   {
-    spawnCube(objectsToDraw[i]);
+    spawnTarget(objectsToDraw[i]);
   }
 }
 
-setInterval(gameTick, 1000);
+function countdown(){
+
+  //const countdownString = document.getElementById("countdownString");
+
+ // let seconds = timer;
+  //countdownString.innerHTML = `${seconds}`;
+  //timer--;
+  alert("Accuracy: " + playerStat.calculateAccuracy());
+}
+
+//setInterval(countdown, timer);
+setTimeout(countdown, timer);
+setInterval(gameTick, 50);
